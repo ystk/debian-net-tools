@@ -20,3 +20,7 @@ translations.patch
 lib_local_changes.patch
 local-manpages.patch
 Bug#345331-socket_overflow.patch
+Bug#569509-iface_overflow.patch
+Add_missing_headers.patch
+proper-uts-check.patch
+fix-fprintf.patch
