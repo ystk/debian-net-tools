@@ -28,3 +28,7 @@ fix-fprintf.patch
 Bug#747006-inet6_sr.c-buffer-overflows.patch
 Bug#561161-statistics.c-long_numbers.patch
 Bug#508110-inet6.c-initialize_fields.patch
+0001-CVE-2025-46836-interface.c-Stack-based-Buffer-Overfl.patch
+0002-Interface-statistic-regression-after-7a8f42fb2.patch
+0003-ipmaddr.c-Stack-based-buffer-Overflow-in-parse_hex.patch
+0004-proc.c-Stack-based-Buffer-Overflow-in-net-tools-proc.patch

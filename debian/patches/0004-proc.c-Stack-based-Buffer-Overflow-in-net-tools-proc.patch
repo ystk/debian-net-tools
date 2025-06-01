@@ -1,0 +1,73 @@
+From 654422268f807c81d6c7fa6bd2e0c6073969c979 Mon Sep 17 00:00:00 2001
+From: Zephkeks <zephyrofficialdiscord@gmail.com>
+Date: Sat, 17 May 2025 22:11:37 +0200
+Subject: proc.c: Stack-based Buffer Overflow in net-tools (proc_gen_fmt)
+
+Coordinated as GHSA-w7jq-cmw2-cq59.
+---
+ lib/proc.c | 37 ++++++++++++++++++++++++++++++++++---
+ 1 file changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/lib/proc.c b/lib/proc.c
+index 9cd4eeb..a0c8e0b 100644
+--- a/lib/proc.c
++++ b/lib/proc.c
+@@ -15,6 +15,8 @@ char *proc_gen_fmt(char *name, int more, FILE * fh,...)
+     char buf[512], format[512] = "";
+     char *title, *head, *hdr;
+     va_list ap;
++    size_t format_len = 0;
++    size_t format_size = sizeof(format);
+ 
+     if (!fgets(buf, (sizeof buf) - 1, fh))
+ 	return NULL;
+@@ -31,14 +33,43 @@ char *proc_gen_fmt(char *name, int more, FILE * fh,...)
+ 	    *hdr++ = 0;
+ 
+ 	if (!strcmp(title, head)) {
+-	    strcat(format, va_arg(ap, char *));
++	    const char *arg = va_arg(ap, char *);
++	    size_t arg_len = strlen(arg);
++
++	    /* Check if we have enough space for format specifier + space */
++	    if (format_len + arg_len + 1 >= format_size) {
++		fprintf(stderr, "warning: format buffer overflow in %s\n", name);
++		va_end(ap);
++		return NULL;
++	    }
++
++	    strcpy(format + format_len, arg);
++	    format_len += arg_len;
++
+ 	    title = va_arg(ap, char *);
+ 	    if (!title || !head)
+ 		break;
+ 	} else {
+-	    strcat(format, "%*s");	/* XXX */
++	    /* Check if we have enough space for "%*s" */
++	    if (format_len + 3 >= format_size) {
++		fprintf(stderr, "warning: format buffer overflow in %s\n", name);
++		va_end(ap);
++		return NULL;
++	    }
++
++	    strcpy(format + format_len, "%*s");
++	    format_len += 3;
+ 	}
+-	strcat(format, " ");
++
++	/* Check if we have space for the trailing space */
++	if (format_len + 1 >= format_size) {
++	    fprintf(stderr, "warning: format buffer overflow in %s\n", name);
++	    va_end(ap);
++	    return NULL;
++	}
++
++	format[format_len++] = ' ';
++	format[format_len] = '\0';
+     }
+     va_end(ap);
+ 
+-- 
+2.30.2
+

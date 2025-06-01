@@ -1,3 +1,12 @@
+net-tools (1.60-26+deb8u1) jessie-security; urgency=medium
+
+  * Non-maintainer upload by the ELTS Team.
+  * CVE-2025-46836: interface.c: Stack-based Buffer Overflow in get_name()
+  * ipmaddr.c: Stack-based buffer Overflow in parse_hex()
+  * proc.c: Stack-based Buffer Overflow in proc_gen_fmt()
+
+ -- Adrian Bunk <bunk@debian.org>  Sat, 31 May 2025 17:48:49 +0300
+
 net-tools (1.60-26) unstable; urgency=low
 
   * Fix wrong exit codes in netstat.c, closes: #541172.

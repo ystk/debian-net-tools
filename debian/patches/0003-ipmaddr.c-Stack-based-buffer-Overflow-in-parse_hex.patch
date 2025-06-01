@@ -1,0 +1,56 @@
+From dabdeba268a5b52e248c9bd2275e06ebcc245e77 Mon Sep 17 00:00:00 2001
+From: Bernd Eckenfels <net-tools@lina.inka.de>
+Date: Sat, 17 May 2025 21:11:07 +0200
+Subject: ipmaddr.c: Stack-based buffer Overflow in parse_hex()
+
+Coordinated as GHSA-h667-qrp8-gj58.
+---
+ ipmaddr.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/ipmaddr.c b/ipmaddr.c
+index 89cdc08..2e0087a 100644
+--- a/ipmaddr.c
++++ b/ipmaddr.c
+@@ -96,17 +96,17 @@ static int parse_lla(char *str, unsigned char *addr)
+ 	return len;
+ }
+ 
+-static int parse_hex(char *str, unsigned char *addr)
++static int parse_hex(char *str, unsigned char *dst, size_t dstlen)
+ {
+ 	int len=0;
+ 
+-	while (*str) {
++	while (len < dstlen && *str) {
+ 		int tmp;
+ 		if (str[1] == 0)
+ 			return -1;
+ 		if (sscanf(str, "%02x", &tmp) != 1)
+ 			return -1;
+-		addr[len] = tmp;
++		dst[len] = tmp;
+ 		len++;
+ 		str += 2;
+ 	}
+@@ -157,7 +157,7 @@ void read_dev_mcast(struct ma_info **result_p)
+ 
+ 		m.addr.family = AF_PACKET;
+ 
+-		len = parse_hex(hexa, (unsigned char*)&m.addr.data);
++		len = parse_hex(hexa, (unsigned char*)&m.addr.data, sizeof(m.addr.data));
+ 		if (len >= 0) {
+ 			struct ma_info *ma = malloc(sizeof(m));
+ 
+@@ -229,7 +229,7 @@ void read_igmp6(struct ma_info **result_p)
+ 
+ 		m.addr.family = AF_INET6;
+ 
+-		len = parse_hex(hexa, (unsigned char*)&m.addr.data);
++		len = parse_hex(hexa, (unsigned char*)&m.addr.data, sizeof(m.addr.data));
+ 		if (len >= 0) {
+ 			struct ma_info *ma = malloc(sizeof(m));
+ 
+-- 
+2.30.2
+
